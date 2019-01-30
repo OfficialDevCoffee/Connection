@@ -77,6 +77,9 @@ class UserManager:
             newname = self.changeUser(username, message.strip()[8:])
             return (1, newname)
 
+        if message.strip().find('/w') == 0: #보낸 메세지가 커맨드인 'w'이면
+            self.sendMessageToOne(message.strip()[3:].split(' ')[0], ("[%s - 귓속말] %s" %(username, message.strip()[3:].split(' ')[1])))
+            return (0, None)
         pass
 
     def sendMessageToAll(self, message):
@@ -85,6 +88,11 @@ class UserManager:
             pass
         pass
 
+    def sendMessageToOne(self, user, message):
+        connection = self.users[user][0]
+        connection.send(message.encode())
+        pass
+    
     pass
 
 class TcpHandler(socketserver.BaseRequestHandler):

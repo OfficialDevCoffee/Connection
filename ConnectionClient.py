@@ -125,6 +125,18 @@ def exitRoom():
     sock.close()
     pass
 
+def whisper(event):
+    inputbox.delete(0, END)
+    try:
+        inputbox.insert(0, "/w %s "%peoplebox.get(peoplebox.curselection()[0]))
+        pass
+    except:
+        inputbox.delete(0, END)
+        pass
+    root.focus_set()
+    inputbox.focus_set()
+    pass
+
 #font manager
 font = font.Font(family="맑은 고딕", size=10)
 
@@ -144,12 +156,23 @@ peopleframe.pack(side=RIGHT, fill=Y)
 listframe.pack(side=TOP, expand = True, fill=BOTH)
 inputframe.pack(side=BOTTOM, fill=X)
 
+#input creator
+inputlabel = Label(inputframe, text = "메세지 :  ", font=font, bg="#cccccc")
+inputlabel.pack(side=LEFT)
+inputbox = Entry(inputframe, bd=3, font=font, takefocus=1)
+sendbutton = Button(inputframe, text="전송", font=font, command = partial(sendMessage, inputbox, None), padx=15, bg="#cccccc")
+sendbutton.pack(side=RIGHT)
+spacelabel = Label(inputframe, text =" ", font=font, bg="#cccccc")
+spacelabel.pack(side=RIGHT)
+inputbox.pack(side=RIGHT, expand = True, fill=X)
+
 #peoplebox creator
 peoplelabel = Label(peopleframe, text="참여자 목록", font=font, bg="#cccccc", pady=4)
 peoplelabel.pack(side=BOTTOM)
 peoplebarY = Scrollbar(peopleframe)
 peoplebarY.pack(side=RIGHT, fill=Y)
 peoplebox = Listbox(peopleframe, font=font, yscrollcommand = peoplebarY.set)
+peoplebox.bind('<<ListboxSelect>>', whisper)
 peoplebox.pack(side=LEFT, expand = True, fill = Y)
 peoplebarY.config(command = peoplebox.yview)
 
@@ -162,16 +185,6 @@ chatbox = Listbox(listframe, font=font, yscrollcommand = scrollbarY.set, xscroll
 chatbox.pack(side=LEFT, expand = True, fill=BOTH)
 scrollbarY.config(command = chatbox.yview)
 scrollbarX.config(command = chatbox.xview)
-
-#input creator
-inputlabel = Label(inputframe, text = "메세지 :  ", font=font, bg="#cccccc")
-inputlabel.pack(side=LEFT)
-inputbox = Entry(inputframe, bd=3, font=font)
-sendbutton = Button(inputframe, text="전송", font=font, command = partial(sendMessage, inputbox, None), padx=15, bg="#cccccc")
-sendbutton.pack(side=RIGHT)
-spacelabel = Label(inputframe, text =" ", font=font, bg="#cccccc")
-spacelabel.pack(side=RIGHT)
-inputbox.pack(side=RIGHT, expand = True, fill=X)
 
 root.bind('<Return>', partial(sendMessage, inputbox))
 
