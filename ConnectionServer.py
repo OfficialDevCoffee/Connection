@@ -127,7 +127,7 @@ class TcpHandler(socketserver.BaseRequestHandler):
 
     def registerUsername(self):
         while True:
-            self.request.send('> 서버: 사용하실 닉네임을 입력해주세요 < '.encode())
+            self.request.send('#id '.encode())
             username = self.request.recv(1024).decode().strip()
 
             if self.usermanager.addUser(username, self.request, self.client_address):

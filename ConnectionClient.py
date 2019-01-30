@@ -1,14 +1,72 @@
-#clientscreen.py
+#ConnectionClient.py
 from tkinter import *
 from tkinter import font
 from tkinter import messagebox
 from functools import partial
+from os.path import exists
 import socket, _thread
 
+##########################
+#          클라이언트 부분            #
+##########################
+
+#Socket 설정
 HOST = 'localhost'
 PORT = 9009
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+#연결 시작하는 함수 설정
+def startConnection(dialog, hostentry, portentry):
+    global sock
+    if not len(hostentry.get()) == 0 and not len(portentry.get()) == 0:
+        HOST = hostentry.get()
+        PORT = int(portentry.get())
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.connect((HOST, PORT))
+            _thread.start_new_thread(recieveThread, ())
+            destroyDialog(dialog)
+            pass
+        except Exception as e:
+            print(e)
+            messagebox.showerror("죄송해요!", "서버와의 연결에 문제가 발생했습니다.\n나중에 다시 시도해보세요!")
+            pass
+    else:
+        messagebox.showerror("잠깐만요!", "호스트와 포트를 정확하게 입력해주세요!")
+        pass    
+    pass
+
+#메세지 보내는 함수 설정
+def sendMessage(box, event):
+    try:
+        sock.send(box.get().encode())
+        box.delete(0, 'end')
+        pass
+    except Exception as e:
+        messagebox.showerror("죄송해요!", "다음의 문제가 발생했습니다 : \n" + str(e))
+        pass
+    pass
+
+#파일 전송 함수
+def sendFile(filename, event):
+    data_transfered = 0
+    if not exists(filename):
+        return -1
+    with open(filename, 'rb') as file:
+        sock.send('#file'.encode())
+        try:
+            data = file.read(1024)
+            while data:
+                data_transfered += sock.send(data)
+                data = file.read(1024)
+                pass
+            pass
+        except Exception as e:
+            return -2
+        return 0
+    pass
+    
+#메세지 받는 스레드 설정
 def recieveThread():
     while True:
         try:
@@ -16,7 +74,9 @@ def recieveThread():
             if not data:
                 break
             message = data.decode()
-            if message.strip().find('#add') == 0:
+            if message.strip().find('#id') == 0:
+                chatbox.insert(END, "<서버> - 채팅방에서 사용하실 닉네임을 입력해주세요.")
+            elif message.strip().find('#add') == 0:
                 chatbox.insert(END, "<서버> - [%s]님이 입장하셨습니다." %message.strip()[5:])
             elif message.strip().find('#del') == 0:
                 chatbox.insert(END, "<서버> - [%s]님이 퇴장하셨습니다." %message.strip()[5:])
@@ -34,6 +94,8 @@ def recieveThread():
                     peoplebox.insert(END, item)
                     pass
                 pass
+            elif message.strip().find('#file') == 0:
+                pass
             else:
                 chatbox.insert(END, message)
                 pass
@@ -47,43 +109,11 @@ def recieveThread():
     sock.close()
     pass
 
-def sendMessage(box, event):
-    try:
-        sock.send(box.get().encode())
-        box.delete(0, 'end')
-        pass
-    except Exception as e:
-        messagebox.showerror("죄송해요!", "다음의 문제가 발생했습니다 : \n" + str(e))
-        pass
-    pass
+##########################
+#               GUI 부분                 #
+##########################
 
-root = Tk()
-root.title("Connection")
-root.geometry("700x500")
-
-def startConnection(dialog, hostentry, portentry):
-    global sock
-    if not len(hostentry.get()) == 0 and not len(portentry.get()) == 0:
-        HOST = hostentry.get()
-        port = int(portentry.get())
-        try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.connect((HOST, PORT))
-            _thread.start_new_thread(recieveThread, ())
-            destroyDialog(dialog)
-            pass
-        except Exception as e:
-            print(e)
-            messagebox.showerror("죄송해요!", "서버와의 연결에 문제가 발생했습니다.\n나중에 다시 시도해보세요!")
-            pass
-    else:
-        messagebox.showerror("잠깐만요!", "호스트와 포트를 정확하게 입력해주세요!")
-        pass    
-    pass
-
-def destroyDialog(dialog):
-    dialog.destroy()
-
+#채팅방 접속 함수
 def enterRoom():
     dialog = Toplevel()
     dialog.title("채팅방 접속")
@@ -120,11 +150,18 @@ def enterRoom():
     dialog.mainloop()
     pass
 
+#창 닫는 함수
+def destroyDialog(dialog):
+    dialog.destroy()
+    pass
+
+#채팅방 나가는 함수
 def exitRoom():
     sock.send("/quit".encode())
     sock.close()
     pass
 
+#귓속말 함수
 def whisper(event):
     inputbox.delete(0, END)
     try:
@@ -133,22 +170,55 @@ def whisper(event):
     except:
         inputbox.delete(0, END)
         pass
-    root.focus_set()
-    inputbox.focus_set()
     pass
 
-#font manager
+#보낼 파일 선택창 여는 함수
+def openFileToSend():
+    pass
+
+#선택 채팅 기록 삭제 함수
+def deleteChat():
+    chat = chatbox.curselection()[0]
+    if chat:
+        try:
+            chatbox.delete(chat)
+            pass
+        except Exception as e:
+            print(e)
+            pass
+        pass
+    else:
+        pass
+    pass
+
+#모든 채팅 기록 삭제 함수
+def deleteChatAll():
+    chatbox.delete(0, 'end')
+    pass
+
+#tkinter GUI 기본 root 창 설정
+root = Tk()
+root.title("Connection")
+root.geometry("700x500")
+
+#폰트 관리자 선언
 font = font.Font(family="맑은 고딕", size=10)
 
-#menu creator
+#메뉴 생성
 menubar = Menu(root)
 conmenu = Menu(menubar, tearoff=0)
 conmenu.add_command(label="채팅방 접속하기", font=font, command = enterRoom)
 conmenu.add_command(label="채팅방 나가기", font=font, command = exitRoom)
-menubar.add_cascade(label="채팅방", font=font, menu = conmenu)
+menubar.add_cascade(label="채팅 연결", font=font, menu = conmenu)
+chatmenu = Menu(menubar, tearoff=0)
+chatmenu.add_command(label="파일 보내기", font=font, command = openFileToSend)
+chatmenu.add_separator()
+chatmenu.add_command(label="선택 채팅 기록 삭제", font=font, command = deleteChat)
+chatmenu.add_command(label="모든 채팅 기록 삭제", font=font, command = deleteChatAll)
+menubar.add_cascade(label="채팅 옵션", font=font, menu = chatmenu)
 root.config(menu = menubar)
 
-#frame creator
+#프레임 생성
 listframe = Frame(root, padx=10, pady=10)
 inputframe = Frame(root, padx=10, pady=5, bg="#cccccc")
 peopleframe = Frame(root, padx=10, pady=10, bg= "#cccccc")
@@ -156,7 +226,7 @@ peopleframe.pack(side=RIGHT, fill=Y)
 listframe.pack(side=TOP, expand = True, fill=BOTH)
 inputframe.pack(side=BOTTOM, fill=X)
 
-#input creator
+#메세지 입력창 설정
 inputlabel = Label(inputframe, text = "메세지 :  ", font=font, bg="#cccccc")
 inputlabel.pack(side=LEFT)
 inputbox = Entry(inputframe, bd=3, font=font, takefocus=1)
@@ -165,8 +235,9 @@ sendbutton.pack(side=RIGHT)
 spacelabel = Label(inputframe, text =" ", font=font, bg="#cccccc")
 spacelabel.pack(side=RIGHT)
 inputbox.pack(side=RIGHT, expand = True, fill=X)
+root.bind('<Return>', partial(sendMessage, inputbox))
 
-#peoplebox creator
+#채팅방 참여인원 표시창 설정
 peoplelabel = Label(peopleframe, text="참여자 목록", font=font, bg="#cccccc", pady=4)
 peoplelabel.pack(side=BOTTOM)
 peoplebarY = Scrollbar(peopleframe)
@@ -176,7 +247,7 @@ peoplebox.bind('<<ListboxSelect>>', whisper)
 peoplebox.pack(side=LEFT, expand = True, fill = Y)
 peoplebarY.config(command = peoplebox.yview)
 
-#chatbox creator
+#채팅창 설정
 scrollbarY = Scrollbar(listframe)
 scrollbarY.pack(side=RIGHT, fill=Y)
 scrollbarX = Scrollbar(listframe, orient=HORIZONTAL)
@@ -185,7 +256,5 @@ chatbox = Listbox(listframe, font=font, yscrollcommand = scrollbarY.set, xscroll
 chatbox.pack(side=LEFT, expand = True, fill=BOTH)
 scrollbarY.config(command = chatbox.yview)
 scrollbarX.config(command = chatbox.xview)
-
-root.bind('<Return>', partial(sendMessage, inputbox))
 
 root.mainloop()
