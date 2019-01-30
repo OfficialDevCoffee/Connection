@@ -15,7 +15,28 @@ def recieveThread():
             data = sock.recv(1024)
             if not data:
                 break
-            chatbox.insert(END, data.decode())
+            message = data.decode()
+            if message.strip().find('#add') == 0:
+                chatbox.insert(END, "<서버> - [%s]님이 입장하셨습니다." %message.strip()[5:])
+            elif message.strip().find('#del') == 0:
+                chatbox.insert(END, "<서버> - [%s]님이 퇴장하셨습니다." %message.strip()[5:])
+                pass
+            elif message.strip().find('#change') == 0:
+                i = peoplebox.get(0, END).index(message.strip()[8:].split(' ')[0])
+                peoplebox.delete(i)
+                peoplebox.insert(i, message.strip()[8:].split(' ')[1])
+                chatbox.insert(END, "<서버> - [%s]님이 닉네임을 [%s]로 변경하셨습니다." %(message.strip()[8:].split(' ')[0], message.strip()[8:].split(' ')[1]))
+                pass
+            elif message.strip().find('#list') == 0:
+                peoplebox.delete(0, END)
+                people = message.strip()[6:].split(' ')
+                for item in people:
+                    peoplebox.insert(END, item)
+                    pass
+                pass
+            else:
+                chatbox.insert(END, message)
+                pass
             pass
         except OSError:
             pass
@@ -38,10 +59,7 @@ def sendMessage(box, event):
 
 root = Tk()
 root.title("Connection")
-root.geometry("400x500")
-
-def donothing():
-    pass
+root.geometry("700x500")
 
 def startConnection(dialog, hostentry, portentry):
     global sock
@@ -121,15 +139,29 @@ root.config(menu = menubar)
 #frame creator
 listframe = Frame(root, padx=10, pady=10)
 inputframe = Frame(root, padx=10, pady=5, bg="#cccccc")
+peopleframe = Frame(root, padx=10, pady=10, bg= "#cccccc")
+peopleframe.pack(side=RIGHT, fill=Y)
 listframe.pack(side=TOP, expand = True, fill=BOTH)
 inputframe.pack(side=BOTTOM, fill=X)
 
-#listbox creator
-scrollbar = Scrollbar(listframe)
-scrollbar.pack(side=RIGHT, fill=Y)
-chatbox = Listbox(listframe, font=font, yscrollcommand = scrollbar.set)
+#peoplebox creator
+peoplelabel = Label(peopleframe, text="참여자 목록", font=font, bg="#cccccc", pady=4)
+peoplelabel.pack(side=BOTTOM)
+peoplebarY = Scrollbar(peopleframe)
+peoplebarY.pack(side=RIGHT, fill=Y)
+peoplebox = Listbox(peopleframe, font=font, yscrollcommand = peoplebarY.set)
+peoplebox.pack(side=LEFT, expand = True, fill = Y)
+peoplebarY.config(command = peoplebox.yview)
+
+#chatbox creator
+scrollbarY = Scrollbar(listframe)
+scrollbarY.pack(side=RIGHT, fill=Y)
+scrollbarX = Scrollbar(listframe, orient=HORIZONTAL)
+scrollbarX.pack(side=BOTTOM, fill=X)
+chatbox = Listbox(listframe, font=font, yscrollcommand = scrollbarY.set, xscrollcommand = scrollbarX.set)
 chatbox.pack(side=LEFT, expand = True, fill=BOTH)
-scrollbar.config(command = chatbox.yview)
+scrollbarY.config(command = chatbox.yview)
+scrollbarX.config(command = chatbox.xview)
 
 #input creator
 inputlabel = Label(inputframe, text = "메세지 :  ", font=font, bg="#cccccc")

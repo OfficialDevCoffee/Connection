@@ -14,6 +14,14 @@ class UserManager:
 
     def __init__(self):
         self.users = {} #사용자 등록 정보를 담을 사전 {id:(socket, address), ...}
+        pass
+
+    def userList(self):
+        userlist = ""
+        for item in self.users.keys():
+            userlist += (str(item) + " ")
+            pass
+        return userlist
 
     def addUser(self, username, connection, address): #사용자 ID를 self.users에 추가
         if username in self.users: #이미 등록되어 있다면
@@ -25,9 +33,9 @@ class UserManager:
         self.users[username] = (connection, address)
         lock.release() #업뎃 후 락 해제
 
-        self.sendMessageToAll('> [%s] 님이 입장하셨습니다.' %username)
+        self.sendMessageToAll('#add %s' %username)
+        self.sendMessageToAll('#list %s' %self.userList())
         print('+++참여자 수 [%d]' %len(self.users))
-
         return username
 
     def removeUser(self, username): #사용자 ID를 self.users에서 제거
@@ -39,19 +47,35 @@ class UserManager:
         del self.users[username]
         lock.release()
 
-        self.sendMessageToAll('> [%s] 님이 퇴장하셨습니다.' %username)
+        self.sendMessageToAll('#del %s' %username)
+        self.sendMessageToAll('#list %s' %self.userList())
         print('+++참여자 수 [%d]' %len(self.users))
-
         pass
+
+    def changeUser(self, username, newname):
+        if username not in self.users:
+            return
+
+        lock.acquire()
+        self.users[newname] = self.users[username]
+        del self.users[username]
+        lock.release()
+
+        self.sendMessageToAll("#change %s %s" %(username, newname))
+        return newname
 
     def messageHandler(self, username, message): #전송 메세지를 처리하는 부분
         if message[0] != '/': #보낸 메세지의 첫 문자가 '/'가 아니면
             self.sendMessageToAll('[%s] %s' %(username, message))
-            return
+            return (0, None)
 
         if message.strip() == '/quit': #보낸 메세지가 커맨드인 'quit'이면
             self.removeUser(username)
-            return -1
+            return (-1, None)
+
+        if message.strip().find('/change') == 0: #보낸 메세지가 커멘드인 'change'이면
+            newname = self.changeUser(username, message.strip()[8:])
+            return (1, newname)
 
         pass
 
@@ -73,10 +97,14 @@ class TcpHandler(socketserver.BaseRequestHandler):
             username = self.registerUsername()
             message = self.request.recv(1024)
             while message:
-                print(message.decode())
-                if self.usermanager.messageHandler(username, message.decode()) == -1:
+                print((username, message.decode()))
+                status = self.usermanager.messageHandler(username, message.decode())
+                if status[0] == -1:
                     self.request.close()
                     break
+                elif status[0] == 1:
+                    username = status[1]
+                    pass
                 message = self.request.recv(1024)
                 pass
             pass
@@ -92,10 +120,10 @@ class TcpHandler(socketserver.BaseRequestHandler):
     def registerUsername(self):
         while True:
             self.request.send('> 서버: 사용하실 닉네임을 입력해주세요 < '.encode())
-            username = self.request.recv(1024)
-            username = username.decode().strip()
+            username = self.request.recv(1024).decode().strip()
 
             if self.usermanager.addUser(username, self.request, self.client_address):
+                self.request.send(('#list %s' %self.usermanager.userList()).encode())
                 return username
             pass
         pass
