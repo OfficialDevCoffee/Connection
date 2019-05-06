@@ -131,7 +131,6 @@ class TcpHandler(socketserver.BaseRequestHandler):
             username = self.request.recv(1024).decode().strip()
 
             if self.usermanager.addUser(username, self.request, self.client_address):
-                self.request.send(('#list %s' %self.usermanager.userList()).encode())
                 return username
             pass
         pass
