@@ -2,6 +2,7 @@
 from tkinter import *
 from tkinter import font
 from tkinter import messagebox
+from tkinter import filedialog
 from functools import partial
 from os.path import exists
 import socket, _thread
@@ -157,8 +158,17 @@ def destroyDialog(dialog):
 
 #채팅방 나가는 함수
 def exitRoom():
-    sock.send("/quit".encode())
-    sock.close()
+    reply = messagebox.askquestion("채팅방 나가기", "현재 채팅방을 나가시겠습니까?",)
+    if reply:
+        try:
+            sock.send("/quit".encode())
+            sock.close()
+            pass
+        except:
+            pass
+        chatbox.delete(0, END)
+        peoplebox.delete(0, END)
+        pass
     pass
 
 #귓속말 함수
@@ -174,6 +184,14 @@ def whisper(event):
 
 #보낼 파일 선택창 여는 함수
 def openFileToSend():
+    filename = filedialog.askopenfilename(title = "전송할 파일 선택")
+    return filename
+
+#파일 전송 함수
+def sendFile():
+    filename = openFileToSend()
+    if filename:
+        pass
     pass
 
 #선택 채팅 기록 삭제 함수
@@ -211,7 +229,7 @@ conmenu.add_command(label="채팅방 접속하기", font=font, command = enterRo
 conmenu.add_command(label="채팅방 나가기", font=font, command = exitRoom)
 menubar.add_cascade(label="채팅 연결", font=font, menu = conmenu)
 chatmenu = Menu(menubar, tearoff=0)
-chatmenu.add_command(label="파일 보내기", font=font, command = openFileToSend)
+chatmenu.add_command(label="파일 보내기", font=font, command = sendFile)
 chatmenu.add_separator()
 chatmenu.add_command(label="선택 채팅 기록 삭제", font=font, command = deleteChat)
 chatmenu.add_command(label="모든 채팅 기록 삭제", font=font, command = deleteChatAll)
