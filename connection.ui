@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>358</width>
+    <height>260</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>맑은 고딕</family>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="font">
+    <font>
+     <family>맑은 고딕</family>
+    </font>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="9,1">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QWidget" name="horizontalLayoutWidget">
+       <layout class="QHBoxLayout" name="horizontalLayout_chat" stretch="0">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_chat">
+          <item>
+           <widget class="QTextBrowser" name="textBrowser_chat">
+            <property name="font">
+             <font>
+              <family>맑은 고딕</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_chat">
+            <property name="font">
+             <font>
+              <family>맑은 고딕</family>
+             </font>
+            </property>
+            <property name="text">
+             <string>채팅 내용</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="horizontalLayoutWidget_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_people">
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_people">
+          <item>
+           <widget class="QTextBrowser" name="textBrowser_people">
+            <property name="font">
+             <font>
+              <family>맑은 고딕</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_people">
+            <property name="font">
+             <font>
+              <family>맑은 고딕</family>
+             </font>
+            </property>
+            <property name="text">
+             <string>채팅방 참여자 목록</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_message" stretch="8,2">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QTextEdit" name="textEdit">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>맑은 고딕</family>
+         </font>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAsNeeded</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <family>맑은 고딕</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>PushButton</string>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>358</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>채팅방</string>
+    </property>
+    <addaction name="actionmake_new_room"/>
+    <addaction name="actionconnect_room"/>
+    <addaction name="separator"/>
+    <addaction name="actionexit_room"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>채팅 옵션</string>
+    </property>
+    <addaction name="actiondelete_selected"/>
+    <addaction name="actiondelete_all"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionmake_new_room">
+   <property name="text">
+    <string>채팅방 만들기</string>
+   </property>
+  </action>
+  <action name="actionconnect_room">
+   <property name="text">
+    <string>채팅방 들어가기</string>
+   </property>
+  </action>
+  <action name="actionexit_room">
+   <property name="text">
+    <string>채팅방 나가기</string>
+   </property>
+  </action>
+  <action name="actiondelete_selected">
+   <property name="text">
+    <string>선택 채팅 기록 삭제</string>
+   </property>
+  </action>
+  <action name="actiondelete_all">
+   <property name="text">
+    <string>모든 채팅 기록 삭제</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
